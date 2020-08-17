@@ -15,6 +15,7 @@ void setup() {
   for(int i = 0 ; i < ledNum; i++){
     pinMode(leds[i], OUTPUT); 
   }
+  randomSeed(analogRead(A0));
 }
 
 void loop() {

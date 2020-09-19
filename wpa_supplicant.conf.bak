@@ -1,0 +1,5 @@
+network={
+    ssid="CafeGyum_3F"
+    psk="cafegyum"
+    key_mgmt=WPA-PSK
+}

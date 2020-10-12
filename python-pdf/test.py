@@ -1,11 +1,18 @@
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+# 출처: https: // swgurus.tistory.com/79 [In Quest for Gurus]
 from PyQt5.QtWidgets import QApplication, QWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QPushButton, QDialog
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPdfWriter, QPagedPaintDevice, QPainter, QScreen, QPixmap
 from PyQt5.QtPrintSupport import QPrinter, QPrintDialog
 import sys
-import random
 
-QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+# c = canvas.Canvas("/Users/pechezi/Downloads/sample.pdf")
+
+rowNum = 3
+colNum = 1
 
 class MyWidget(QWidget):
     def __init__(self):
@@ -16,8 +23,8 @@ class MyWidget(QWidget):
         vbox = QVBoxLayout()
         # 테이블 생성
         self.table = QTableWidget(self)
-        self.table.setRowCount(3)
-        self.table.setColumnCount(1)
+        self.table.setRowCount(rowNum)
+        self.table.setColumnCount(colNum)
         col = ["Message"]
         self.table.setHorizontalHeaderLabels(col)
         self.table.setItem(0, 0, QTableWidgetItem(str("Hello, World")))
@@ -35,6 +42,7 @@ class MyWidget(QWidget):
         vbox.addWidget(self.btn2)
         self.setLayout(vbox)
         self.resize(600, 400)
+
 
     def btnClick(self):
         # 프린터 생성, 실행
@@ -54,7 +62,7 @@ class MyWidget(QWidget):
             yscale = (printer.pageRect().height()-hgap)/self.table.height()
             scale = xscale if xscale < yscale else yscale
             qp.translate(printer.paperRect().x() + printer.pageRect().width()/2,
-                         printer.paperRect().y() + printer.pageRect().height()/2)
+                            printer.paperRect().y() + printer.pageRect().height()/2)
             qp.scale(scale, scale)
             qp.translate(-self.table.width()/2, -self.table.height()/2)
 
@@ -65,26 +73,39 @@ class MyWidget(QWidget):
 
     def btnClick2(self):
         # pdf 생성
-        pdf = QPdfWriter('hello.pdf')
-        pdf.setPageSize(QPagedPaintDevice.A4)
+        pdfmetrics.registerFont(TTFont("HCR Batang", "HANBatang-LVT.ttf"))
+        c = canvas.Canvas("/Users/pechezi/Desktop/sample.pdf")
+        c.drawString(100, 750, "Hellow,world!")
+        text1 = self.table.item(0,0).text()
+        text2 = self.table.item(1,0).text()
+        # text1 = text1.text()
+        # text2 = self.table.itme(1,1).text()
+        print(text1)
+        # print(text2)
+        c.drawString(100, 780, u(text1))
+        c.drawString(100, 810, u(text2))
+        c.save()
+    
+    # pdf = QPdfWriter('hello.pdf')
+    # pdf.setPageSize(QPagedPaintDevice.A4)
 
-        # 화면 캡쳐
-        screen = QApplication.primaryScreen()
-        img = screen.grabWindow(self.winId(), 0, 0, self.rect().width(), self.rect().height())
+    # # 화면 캡쳐
+    # screen = QApplication.primaryScreen()
+    # img = screen.grabWindow(self.winId(), 0, 0, self.rect().width(), self.rect().height())
 
-        # 3항 연산자 (a if test else b, 만약 test가 참이면 a, 아니면 b)
-        # 이미지 크기는 큰 값 기준, PDF 크기는 작은값 기준(화면 초과 방지)
-        img_size = img.width() if img.width()-img.height() > 0 else img.height()
-        pdf_size = pdf.width() if pdf.width()-pdf.height() < 0 else pdf.height()
+    # # 3항 연산자 (a if test else b, 만약 test가 참이면 a, 아니면 b)
+    # # 이미지 크기는 큰 값 기준, PDF 크기는 작은값 기준(화면 초과 방지)
+    # img_size = img.width() if img.width()-img.height() > 0 else img.height()
+    # pdf_size = pdf.width() if pdf.width()-pdf.height() < 0 else pdf.height()
 
-        # 최적 비율 얻기
-        ratio = pdf_size / img_size
+    # # 최적 비율 얻기
+    # ratio = pdf_size / img_size
 
-        # pdf에 쓰기
-        qp = QPainter()
-        qp.begin(pdf)
-        qp.drawPixmap(0, 0, img.width()*ratio, img.height()*ratio, img)
-        qp.end()
+    # # pdf에 쓰기
+    # qp = QPainter()
+    # qp.begin(pdf)
+    # qp.drawPixmap(0, 0, img.width()*ratio, img.height()*ratio, img)
+    # qp.end()
 
 
 if __name__ == '__main__':

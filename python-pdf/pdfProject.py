@@ -4,6 +4,10 @@ from PyQt5.QtGui import QPdfWriter, QPagedPaintDevice, QPainter, QScreen, QPixma
 from PyQt5.QtPrintSupport import QPrinter, QPrintDialog
 import sys
 import random
+from reportlab.pdfgen import canvas 
+from reportlab.pdfbase import pdfmetrics 
+from reportlab.pdfbase.ttfonts import TTFont
+
 
 QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
 

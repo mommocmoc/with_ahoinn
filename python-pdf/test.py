@@ -1,18 +1,23 @@
+#pip3 install tika reportlab PyQt5
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
+from tika import parser
+
 # 출처: https: // swgurus.tistory.com/79 [In Quest for Gurus]
-from PyQt5.QtWidgets import QApplication, QWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QPushButton, QDialog
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QApplication, QWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QPushButton, QDialog, QHeaderView
 from PyQt5.QtGui import QPdfWriter, QPagedPaintDevice, QPainter, QScreen, QPixmap
 from PyQt5.QtPrintSupport import QPrinter, QPrintDialog
 import sys
 
+from tika.parser import from_file
+
 # c = canvas.Canvas("/Users/pechezi/Downloads/sample.pdf")
 
-rowNum = 3
+rowNum = 10
 colNum = 1
+path = "/Users/pechezi/Desktop/data.pdf"
 
 class MyWidget(QWidget):
     def __init__(self):
@@ -27,6 +32,8 @@ class MyWidget(QWidget):
         self.table.setColumnCount(colNum)
         col = ["Message"]
         self.table.setHorizontalHeaderLabels(col)
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+
         self.table.setItem(0, 0, QTableWidgetItem(str("Hello, World")))
         self.table.setItem(1, 0, QTableWidgetItem(str("안녕하세요. 김대환님")))
         # 버튼 생성
@@ -36,10 +43,14 @@ class MyWidget(QWidget):
         self.btn2 = QPushButton('Make PDF file', self)
         self.btn2.clicked.connect(self.btnClick2)
 
+        self.btn3 = QPushButton('Load PDF file', self)
+        self.btn3.clicked.connect(self.btnClick3)
+
         # 컨트롤들 박스 레이아웃 배치
         vbox.addWidget(self.table)
         vbox.addWidget(self.btn)
         vbox.addWidget(self.btn2)
+        vbox.addWidget(self.btn3)
         self.setLayout(vbox)
         self.resize(600, 400)
 
@@ -74,17 +85,49 @@ class MyWidget(QWidget):
     def btnClick2(self):
         # pdf 생성
         pdfmetrics.registerFont(TTFont("HCR Batang", "HANBatang-LVT.ttf"))
-        c = canvas.Canvas("/Users/pechezi/Desktop/sample.pdf")
-        c.drawString(100, 750, "Hellow,world!")
-        text1 = self.table.item(0,0).text()
-        text2 = self.table.item(1,0).text()
-        # text1 = text1.text()
-        # text2 = self.table.itme(1,1).text()
-        print(text1)
-        # print(text2)
-        c.drawString(100, 780, u(text1))
-        c.drawString(100, 810, u(text2))
+        c = canvas.Canvas(path)
+        c.setFont("HCR Batang", 16)
+        c.setTitle("소재환 데이터")
+        # c.drawString(100, 750, "Hellow,world!")
+        for i in range(rowNum):
+            try:
+                text = self.table.item(i, 0).text()
+                c.drawString(100, 780-30*i, text)
+                pass
+            except :
+                pass
+
         c.save()
+
+    def btnClick3(self):
+        """
+        PDF Loading Button
+        """
+        # try:
+        print(path)
+        with open(path, 'rb') as f:
+            
+            
+            parsed = parser.from_file(path)
+            text = parsed["content"]
+            text = text.strip()
+            text = text.split("\n")
+            text = list(filter(None,text))
+            print(len(text))
+            for i in range(len(text)):
+                self.table.setItem(i,0,QTableWidgetItem(str(text[i])))
+            print(text)
+            # print(parsed["content"])
+            # get the first page
+            # page = pdf.getPage(1)
+            # print(page)
+            # print('Page type: {}'.format(str(type(page))))
+            # text = page.extractText()
+            # print(text)
+        # except:
+            # print("There is no data.")
+            
+
     
     # pdf = QPdfWriter('hello.pdf')
     # pdf.setPageSize(QPagedPaintDevice.A4)
